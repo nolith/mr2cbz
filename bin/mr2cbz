@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'mechanize'      
+# require 'zip/zip'
+# require 'zip/zipfilesystem'
+
+TITLE_MATCHER = /(.+)\s(\d+)\s-\sPage\s(\d+)/
+
+def download(manga, from, to)
+  a = Mechanize.new { |agent|
+    agent.user_agent_alias = 'Mac Safari'
+  }
+
+  a.get(manga) do |page|
+    chapter = from
+    page.links_with( :href=>%r{/chapter-\d+\.html$} ).each do |chapter_link|
+      chapter_link.href =~ %r{/chapter-(\d+)\.html$}
+      chap_n = $1.to_i
+      if chap_n < from || chap_n > to
+        puts "Skipping chapter #{chap_n}"
+        next
+      end
+      
+      sane_folder = chapter_link.text.gsub(/\W/,'_')
+      puts "Downloading #{chapter_link.text} in #{sane_folder}"
+    
+      img_page = a.click chapter_link
+      this_chapter = chapter
+      page = 1
+      while chapter == this_chapter
+    
+        dest = File.join(sane_folder, ("%03d.jpg" % page))
+        puts "Downloading #{img_page.image.alt}"
+        img_page.image.fetch.save(dest)
+  
+        img_page = img_page.link_with( :text => 'Next' ).click
+        mm = TITLE_MATCHER.match(img_page.image.text)
+        this_chapter = mm.captures[1].to_i
+        page = mm.captures[2]
+#binding.pry
+      end
+
+      # Give the path of the temp file to the zip outputstream, 
+      #   it won't try to open it as an archive.
+      # Zip::ZipOutputStream.open("#{sane_folder}.cbz") do |zos|
+      #   Dir.glob(File.join(sane_folder, '*.jpg')) do |file|
+      #     # Create a new entry with some arbitrary name
+      #     zos.put_next_entry(File.basename file)
+      #     # Add the contents of the file, don't read the stuff linewise if its binary, instead use direct IO
+      #     zos.print IO.read(file)
+      #   end
+      # end
+      `zip -0 #{sane_folder}.cbz #{sane_folder}/*`
+      puts "#{sane_folder}.cbz created!"
+    end
+  end
+end
+
+if _file_ == $0 do
+  download(ARGV[0], ARGV[1], ARGV[2])
+end
