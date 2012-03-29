@@ -57,6 +57,6 @@ def download(manga, from, to)
   end
 end
 
-if _file_ == $0 do
+if File.basename(__FILE__) == File.basename($0)
   download(ARGV[0], ARGV[1], ARGV[2])
 end
