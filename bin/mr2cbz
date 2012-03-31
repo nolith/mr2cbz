@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
-$:<<'../lib'
 
 require "rubygems" # ruby1.9 doesn't "require" it though
-require "mr2cbz"
+require "mr2cbz/task"
 
 
 Mr2cbz::Task.start

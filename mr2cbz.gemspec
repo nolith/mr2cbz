@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = Mr2cbz::VERSION
   s.authors     = ["Alessio Caiazza"]
   s.email       = ["nolith@abisso.org"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/nolith/mr2cbz"
   s.summary     = %q{From mangareader.net to CBZ}
-  s.description = %q{mr2cbz http://www.mangareader.net/400/freezing.html first_chapter last_chapter}
+  s.description = %q{Downloads manga from mangareder.net in CBZ format}
 
   s.rubyforge_project = "mr2cbz"
 

@@ -1,4 +1,5 @@
 require 'mechanize'
+require 'fileutils'
 
 module Mr2cbz
   TITLE_MATCHER = /(.+)\s(\d+)\s-\sPage\s(\d+)/
@@ -29,7 +30,7 @@ module Mr2cbz
       to_ret
     end
 
-    def download(from, to)
+    def download(from, to, keep_temp=false)
       @browser.get(MANGA_LIST_URI) do |page|
         page = page.link_with(:text => @name).click
         title = page.at("h2.aname").text
@@ -46,7 +47,11 @@ module Mr2cbz
 
           downloaded << chap_n
 
+          #removes all the non word char from titile and
+          # prepend '0's to chapter number up to 3 char
           sane_folder = chapter_link.text.gsub(/\W/, '_')
+          sane_folder_match  = sane_folder.match /^(.+)_(\d+)$/
+          sane_folder = "%s_%03d" % sane_folder_match.captures
           puts "Downloading #{chapter_link.text} in #{sane_folder}"
 
           img_page = @browser.click chapter_link
@@ -78,6 +83,7 @@ module Mr2cbz
           # end
           `zip -0 #{sane_folder}.cbz #{sane_folder}/*`
           puts "#{sane_folder}.cbz created!"
+          FileUtils.rm_rf sane_folder unless keep_temp
         end
       end
     end
