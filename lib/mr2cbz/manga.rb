@@ -36,16 +36,13 @@ module Mr2cbz
         title = page.at("h2.aname").text
         puts "Manga title: #{title}"
         chapter = from
-        downloaded = []
         page.links_with(:text => %r{^#{title}\s+\d+$}i).each do |chapter_link|
           chapter_link.text =~ %r{^#{title}\s+(\d+)$}i
           chap_n = $1.to_i
-          if (chap_n < from || chap_n > to || downloaded.include?(chap_n))
+          if (chap_n != chapter)
             puts "Skipping chapter #{chap_n}"
             next
           end
-
-          downloaded << chap_n
 
           #removes all the non word char from titile and
           # prepend '0's to chapter number up to 3 char
@@ -69,7 +66,6 @@ module Mr2cbz
             this_chapter = mm.captures[1].to_i
             page = mm.captures[2]
           end
-          chapter = this_chapter
 
           # Give the path of the temp file to the zip outputstream,
           #   it won't try to open it as an archive.
@@ -84,6 +80,9 @@ module Mr2cbz
           `zip -0 #{sane_folder}.cbz #{sane_folder}/*`
           puts "#{sane_folder}.cbz created!"
           FileUtils.rm_rf sane_folder unless keep_temp
+
+          chapter+=1
+          break if ( chapter > to)
         end
       end
     end
